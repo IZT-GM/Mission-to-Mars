@@ -2,7 +2,23 @@
 from splinter import Browser
 from bs4 import BeautifulSoup
 import pandas as pd
-from os import system
+
+def scrape_all():
+    import datetime as dt
+    # Initiate headless driver for deployment
+    browser = Browser("chrome", executable_path="chromedriver", headless=True)
+    #Define variables
+    news_title, news_paragraph = mars_news(browser)
+
+    # Run all scraping functions and store results in dictionary
+    data = {
+        "news_title": news_title,
+        "news_paragraph": news_paragraph,
+        "featured_image": featured_image(browser),
+        "facts": mars_facts(),
+        "last_modified": dt.datetime.now()
+    }
+
 
 
 def mars_news(browser):
@@ -28,7 +44,7 @@ def mars_news(browser):
         news_title=slide_elem.find('div', class_='content_title').get_text()
         
         # Use the parent element to find the paragraph text
-        news_p=slide_elem.find('div', class_='article_teaser_body').get_text()
+        news_paragraph=slide_elem.find('div', class_='article_teaser_body').get_text()
     except AttributeError:
         return None, None
     
@@ -81,4 +97,10 @@ def mars_facts():
     # Assign columns and set index of dataframe
     return df.to_html()
 
+#Close browser and return data
 browser.quit()
+return data
+
+if __name__ == "__main__":
+# If running as script, print scraped data
+print(scrape_all())
